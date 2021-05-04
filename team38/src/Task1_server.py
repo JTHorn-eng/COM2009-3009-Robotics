@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/python
 
 # Import the core Python modules for ROS and to implement ROS Actions:
 import rospy
@@ -35,17 +35,16 @@ class SearchActionServer(object):
     def scan_callback(self, scan_data):
         left_arc = scan_data.ranges[0:21]
         right_arc = scan_data.ranges[-20:]
+        self.left_arc_min = np.array(left_arc).min()
+        self.right_arc_min=np.array(right_arc).min()
         front_arc = np.array(left_arc[::-1] + right_arc[::-1])
         self.min_distance = front_arc.min()
         self.object_angle = self.arc_angles[np.argmin(front_arc)]
     
     def action_server_launcher(self, goal):
-        r = rospy.Rate(10)
+        r = rospy.Rate(60)
 
         success = True
-        if goal.fwd_velocity <= 0 or goal.fwd_velocity > 0.26:
-            print("Invalid velocity.  Select a value between 0 and 0.26 m/s.")
-            success = False
         if goal.approach_distance <= 0.2:
             print("Invalid approach distance: I'll crash!")
             success = False
@@ -65,34 +64,33 @@ class SearchActionServer(object):
 
         print("The robot will start to move now...")
         # set the robot velocity:
-        self.robot_controller.set_move_cmd(goal.fwd_velocity, 0.0)
         
-        while self.min_distance > goal.approach_distance:
-            self.robot_controller.publish()
-            # check if there has been a request to cancel the action mid-way through:
-            if self.actionserver.is_preempt_requested():
+        while success :
+        
+        
+         while self.min_distance > goal.approach_distance:
+             self.robot_controller.set_move_cmd(goal.fwd_velocity, 0.0)
+             self.robot_controller.publish()
+             # check if there has been a request to cancel the action mid-way through:
+             if self.actionserver.is_preempt_requested():
                 rospy.loginfo("Cancelling the camera sweep.")
                 self.actionserver.set_preempted()
                 # stop the robot:
                 self.robot_controller.stop()
                 success = False
-                # exit the loop:
                 break
-            
-            self.distance = sqrt(pow(self.posx0 - self.robot_odom.posx, 2) + pow(self.posy0 - self.robot_odom.posy, 2))
-            # populate the feedback message and publish it:
-            self.feedback.current_distance_travelled = self.distance
-            self.actionserver.publish_feedback(self.feedback)
-
-        if success:
-            rospy.loginfo("approach completed sucessfully.")
-            self.result.total_distance_travelled = self.distance
-            self.result.closest_object_distance = self.min_distance
-            self.result.closest_object_angle = self.object_angle
-
-            self.actionserver.set_succeeded(self.result)
-            self.robot_controller.stop()
-            
+                # exit the loop:
+         while self.left_arc_min <= goal.approach_distance: # if the left side is too close 
+             self.robot_controller.set_move_cmd(0.0, -0.5)
+             self.robot_controller.publish()
+             print("left")
+             print(self.left_arc_min)
+             
+         while self.right_arc_min<=goal.approach_distance: # if the right side is too close 
+             self.robot_controller.set_move_cmd(0.0,0.5)
+             self.robot_controller.publish()
+             print("right")
+             print(self.right_arc_min)        
 if __name__ == '__main__':
     rospy.init_node("search_action_server")
     SearchActionServer()

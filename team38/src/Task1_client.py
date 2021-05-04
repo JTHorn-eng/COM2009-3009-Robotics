@@ -21,7 +21,7 @@ class action_client(object):
         
         rospy.init_node("search_action_client")
 
-        self.rate = rospy.Rate(1)
+        self.rate = rospy.Rate(60)
 
         self.goal = SearchGoal()
 
@@ -49,18 +49,21 @@ class action_client(object):
         self.client.send_goal(self.goal, feedback_cb=self.feedback_callback)
 
     def main(self):
-        self.send_goal(velocity = 0.1, approach = 0.5)
+        self.send_goal(velocity = 0.24, approach = 0.55)
         prempt = False
+        StartTime = rospy.get_rostime()
+        print("the robot will now move for 60 seconds...")
         while self.client.get_state() < 2:
             print("FEEDBACK: Currently travelled {:.3f} m, STATE: Current state code is {}".format(self.distance, self.client.get_state()))
-            if self.distance >= 2:
+            if rospy.get_rostime().secs - StartTime.secs > 60 :
                 rospy.logwarn("Cancelling goal now...")
                 self.client.cancel_goal()
                 rospy.logwarn("Goal Cancelled")
                 prempt = True
+                rospy.loginfo('60 seconds have elapsed, stopping the robot...')
                 break
 
-            self.rate.sleep()0
+            self.rate.sleep()
         
         self.action_complete = True
         print("RESULT: Action State = {}".format(self.client.get_state()))
@@ -76,4 +79,3 @@ if __name__ == '__main__':
         ac_object.main()
     except rospy.ROSInterruptException:
         pass
-
