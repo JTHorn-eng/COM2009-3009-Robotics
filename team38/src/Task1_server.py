@@ -21,17 +21,18 @@ class SearchActionServer(object):
     result = SearchResult()
 
     def __init__(self):
+        
         self.actionserver = actionlib.SimpleActionServer("/search_action_server", 
             SearchAction, self.action_server_launcher, auto_start=False)
         self.actionserver.start()
-
         self.scan_subscriber = rospy.Subscriber("/scan",
             LaserScan, self.scan_callback)
-
         self.robot_controller = MoveTB3()
         self.robot_odom = TB3Odometry()
         self.arc_angles = np.arange(-20, 21)
-
+        self.min_distance = 0
+        self.left_arc_min = 0
+        self.right_arc_min = 0
     
     def scan_callback(self, scan_data):
         left_arc = scan_data.ranges[0:21]
@@ -57,7 +58,7 @@ class SearchActionServer(object):
             self.actionserver.set_aborted()
             return
 
-        print("Request to move at {:.3f}m/s and stop {:.2f}m infront of any obstacles".format(goal.fwd_velocity, goal.approach_distance))
+       
 
         # Get the current robot odometry:
         self.posx0 = self.robot_odom.posx
@@ -84,14 +85,14 @@ class SearchActionServer(object):
          while self.left_arc_min <= goal.approach_distance: # if the left side is too close 
              self.robot_controller.set_move_cmd(0.0, -0.5)
              self.robot_controller.publish()
-             print("left")
-             print(self.left_arc_min)
+             
+             
              
          while self.right_arc_min<=goal.approach_distance: # if the right side is too close 
              self.robot_controller.set_move_cmd(0.0,0.5)
              self.robot_controller.publish()
-             print("right")
-             print(self.right_arc_min)        
+             
+                  
 if __name__ == '__main__':
     rospy.init_node("search_action_server")
     SearchActionServer()

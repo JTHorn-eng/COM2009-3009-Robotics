@@ -8,12 +8,11 @@ from com2009_actions.msg import SearchAction, SearchGoal
 class action_client(object):
    
     def feedback_callback(self, feedback_data):
-        self.distance = feedback_data.current_distance_travelled
         if self.i < 100:
             self.i += 1
         else:
             self.i = 0
-            print("FEEDBACK: Currently travelled {:.3f} m".format(self.distance))
+            
 
     def __init__(self):
  
@@ -54,7 +53,6 @@ class action_client(object):
         StartTime = rospy.get_rostime()
         print("the robot will now move for 60 seconds...")
         while self.client.get_state() < 2:
-            print("FEEDBACK: Currently travelled {:.3f} m, STATE: Current state code is {}".format(self.distance, self.client.get_state()))
             if rospy.get_rostime().secs - StartTime.secs > 60 :
                 rospy.logwarn("Cancelling goal now...")
                 self.client.cancel_goal()
@@ -66,12 +64,7 @@ class action_client(object):
             self.rate.sleep()
         
         self.action_complete = True
-        print("RESULT: Action State = {}".format(self.client.get_state()))
-        if prempt:
-            print("RESULT: Action preempted after travelling 2 meters")
-        else:
-            result = self.client.get_result()
-            print("RESULT: closest object {:.3f} m away at a location of {:.3f} degrees".format(result.closest_object_distance, result.closest_object_angle))
+       
 
 if __name__ == '__main__':
     ac_object = action_client()
