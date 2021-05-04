@@ -51,19 +51,19 @@ class action_client(object):
         self.send_goal(velocity = 0.24, approach = 0.55)
         prempt = False
         StartTime = rospy.get_rostime()
-        print("the robot will now move for 60 seconds...")
+        print("the robot will now move for 90 seconds...")
         while self.client.get_state() < 2:
-            if rospy.get_rostime().secs - StartTime.secs > 60 :
+            if rospy.get_rostime().secs - StartTime.secs > 90 :
                 rospy.logwarn("Cancelling goal now...")
                 self.client.cancel_goal()
                 rospy.logwarn("Goal Cancelled")
                 prempt = True
-                rospy.loginfo('60 seconds have elapsed, stopping the robot...')
+                rospy.loginfo('90 seconds have elapsed, stopping the robot...')
                 break
 
             self.rate.sleep()
         
-        self.action_complete = True
+        self.ac1tion_complete = True
        
 
 if __name__ == '__main__':
