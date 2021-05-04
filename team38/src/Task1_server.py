@@ -68,7 +68,7 @@ class SearchActionServer(object):
         while success :
         
         
-         while self.min_distance > goal.approach_distance:
+         while self.left_arc_min and self.right_arc_min> goal.approach_distance:
              self.robot_controller.set_move_cmd(goal.fwd_velocity, 0.0)
              self.robot_controller.publish()
              # check if there has been a request to cancel the action mid-way through:
