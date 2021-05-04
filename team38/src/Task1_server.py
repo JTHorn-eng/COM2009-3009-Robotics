@@ -56,7 +56,7 @@ class SearchActionServer(object):
             self.actionserver.set_aborted()
             return
 
-        print("Request to move at {:.3f}m/s and stop {:.2f}m infront of any obstacles".format(goal.fwd_velocity, goal.approach_distance))
+       
 
         # Get the current robot odometry:
         self.posx0 = self.robot_odom.posx
@@ -83,14 +83,14 @@ class SearchActionServer(object):
          while self.left_arc_min <= goal.approach_distance: # if the left side is too close 
              self.robot_controller.set_move_cmd(0.0, -0.5)
              self.robot_controller.publish()
-             print("left")
-             print(self.left_arc_min)
+             
+             
              
          while self.right_arc_min<=goal.approach_distance: # if the right side is too close 
              self.robot_controller.set_move_cmd(0.0,0.5)
              self.robot_controller.publish()
-             print("right")
-             print(self.right_arc_min)        
+             
+                  
 if __name__ == '__main__':
     rospy.init_node("search_action_server")
     SearchActionServer()

@@ -64,12 +64,7 @@ class action_client(object):
             self.rate.sleep()
         
         self.action_complete = True
-        print("RESULT: Action State = {}".format(self.client.get_state()))
-        if prempt:
-            print("RESULT: Action preempted after travelling 2 meters")
-        else:
-            result = self.client.get_result()
-            print("RESULT: closest object {:.3f} m away at a location of {:.3f} degrees".format(result.closest_object_distance, result.closest_object_angle))
+       
 
 if __name__ == '__main__':
     ac_object = action_client()
