@@ -1,0 +1,7 @@
+<launch>
+   <node pkg="team38" type="Task1_client.py" name="search_action_client"  output="screen">
+   </node>
+   <node pkg="team38" type="Task1_server.py" name="search_action_server"  output="screen">
+   </node>
+   
+ </launch>
