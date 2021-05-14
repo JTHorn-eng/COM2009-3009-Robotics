@@ -12,15 +12,6 @@ class MoveTB3(object):
         self.vel_cmd.linear.x = linear
         self.vel_cmd.angular.z = angular
     
-    def move(self, time, linear, angular):
-        StartTime = rospy.get_rostime()
-        self.set_move_cmd(linear, angular)
-        self.publish()
-        while rospy.get_rostime().secs - StartTime.secs < time:
-            continue
-        self.stop()
-
-
     def publish(self):
         self.publisher.publish(self.vel_cmd)
     
