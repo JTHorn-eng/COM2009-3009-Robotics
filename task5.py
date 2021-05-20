@@ -42,29 +42,35 @@ class SearchActionServer(object):
         self.arc_angles = np.arange(-20, 21)
         self.yaw = self.robot_odom.yaw
         self.posyaw0= self.yaw # initialize xy yaw at the start
-        self.lower = (0,0,0)
-        self.upper = (0,0,0)
-    
-    def detect_pillar(self, lower, upper):
+        self.lower = (115,50,100)
+        self.upper = (130,255,255)
+        self.min_distance = 100000
+
+    def detect_pillar(self):
         detect_pillar = False
         while detect_pillar == False:
-            colour_search_obj.colour_search_obj().main(self.lower ,self.upper)
+            detect_pillar = colour_search_obj.colour_search_obj().main(self.lower ,self.upper)
+        print("TARGET BEACON IDENTIFIED: Beaconing initiated")
+        return detect_pillar
 
-     #I don't think we can use the code for colour search cause it doesn't return any
+    def move_to_pillar(self):
+        while self.min_distance > 450:
+             self.robot_controller.set_move_cmd(0.1, 0)
+             self.robot_controller.publish() 
 
-     #We can just copy and paste the colour detection and distance from the pillar to the robot to see if it's the right pillar 
-    
-    #you can try to run it to see if that work or not
-    #just test this detect_pillar if work or not, move the robot to the final area.
     def action_server_launcher(self, goal): 
-        #self.get_target()
+        self.get_target()
 
-        #self.maze_nav()
+        self.maze_nav()
         
         #add the colour obj here
         #add the code which move infront to target pillar
         #you need to scan the target colour first, before move to it
-        self.detect_pillar()
+        if self.detect_pillar():
+            self.move_to_pillar()
+        self.robot_controller.stop()
+        print("FINAL CHALLENEGE COMPLETE: The robot has now stopped")
+
         
     def get_target(self):
         global hsv
@@ -210,6 +216,9 @@ class SearchActionServer(object):
         left_arc2 = scan_data.ranges[290:300]
         right_arc2 = scan_data.ranges[300:320]
         front_arc2 = np.array(left_arc2 + right_arc2)
+        front_arc = np.array(left_arc0[::-1] + right_arc0[::-1])
+
+        self.min_distance = front_arc.min()
 
         self.front = front_arc0.min()
         self.front_right = front_arc2.min()
